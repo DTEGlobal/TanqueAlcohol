@@ -75,15 +75,14 @@ public class G4Modbus {
     *
     * */
     public boolean getBit (String input){
-
-        if(input.substring(1,2).equals("PU")){
-            return ArrayBits[0][Integer.valueOf(input.substring(2,3))];
-        }else if(input.substring(1,2).equals("SD")){
-            return ArrayBits[1][Integer.valueOf(input.substring(2,3))];
-        }else if(input.substring(1,2).equals("BC")){
-            return ArrayBits[2][Integer.valueOf(input.substring(2,3))];
-        }else if (input.substring(1,2).equals("ED")){
-            return ArrayBits[3][Integer.valueOf(input.substring(2,3))];
+        if(input.substring(0,2).equals("PU")){
+            return ArrayBits[0][Integer.valueOf(input.substring(2,3))-1];
+        }else if(input.substring(0,2).equals("SD")){
+            return ArrayBits[1][Integer.valueOf(input.substring(2,3))-1];
+        }else if(input.substring(0,2).equals("BC")){
+            return ArrayBits[2][Integer.valueOf(input.substring(2,3))-1];
+        }else if (input.substring(0,2).equals("ED")){
+            return ArrayBits[3][Integer.valueOf(input.substring(2,3))-1];
         }
         //TODO throw exception implementation needed
         return false;

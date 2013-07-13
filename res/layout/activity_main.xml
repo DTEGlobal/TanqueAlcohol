@@ -21,9 +21,9 @@
 
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="300dp"
+            android:layout_width="325dp"
             android:layout_height="70dp"
-            android:layout_x="300dp"
+            android:layout_x="265dp"
             android:layout_y="10dp"
             android:background="@drawable/background_with_shadow"
             android:padding="5dp">
@@ -63,7 +63,7 @@
                 android:layout_height="fill_parent"
                 android:text="New ToggleButton"
                 android:id="@+id/toggleButton"
-                android:layout_weight="150"
+                android:layout_weight="200"
                 android:textStyle="bold"
                 android:textOff="Start"
                 android:textOn="Stop"
@@ -80,14 +80,15 @@
             >
 
         <ProgressBar
-                android:id="@+id/vertical_progressbar"
+                android:id="@+id/tank"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 style="@style/Widget.ProgressBar.Vertical"
                 android:progress="79"
                 android:background="@android:color/transparent"
                 android:clickable="false"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:indeterminate="false"/>
 
     </FrameLayout>
 
