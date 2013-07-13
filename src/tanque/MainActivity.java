@@ -36,22 +36,6 @@ public class MainActivity extends Activity {
                 flow1_on.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (flow1_on.getVisibility() == View.INVISIBLE)
-                            flow1_on.setVisibility(View.VISIBLE);
-                        else
-                            flow1_on.setVisibility(View.INVISIBLE);
-                        if (flow2_on.getVisibility() == View.INVISIBLE)
-                            flow2_on.setVisibility(View.VISIBLE);
-                        else
-                            flow2_on.setVisibility(View.INVISIBLE);
-                        if (motor1_on.getVisibility() == View.INVISIBLE)
-                            motor1_on.setVisibility(View.VISIBLE);
-                        else
-                            motor1_on.setVisibility(View.INVISIBLE);
-                        if (motor2_on.getVisibility() == View.INVISIBLE)
-                            motor2_on.setVisibility(View.VISIBLE);
-                        else
-                            motor2_on.setVisibility(View.INVISIBLE);
                     }
                 });
             }
