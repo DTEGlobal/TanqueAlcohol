@@ -15,7 +15,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/mimico"
-            android:src="@drawable/back_todo_off"
+            android:src="@drawable/base_image"
             android:layout_x="0dp"
             android:layout_y="0dp"/>
 
@@ -23,8 +23,8 @@
             android:orientation="horizontal"
             android:layout_width="300dp"
             android:layout_height="70dp"
-            android:layout_x="280dp"
-            android:layout_y="30dp"
+            android:layout_x="300dp"
+            android:layout_y="10dp"
             android:background="@drawable/background_with_shadow"
             android:padding="5dp">
 
@@ -72,11 +72,11 @@
     </LinearLayout>
 
     <FrameLayout
-            android:layout_width="166dp"
-            android:layout_height="197dp"
+            android:layout_width="168dp"
+            android:layout_height="206dp"
             android:addStatesFromChildren="false"
-            android:layout_x="58dp"
-            android:layout_y="40dp"
+            android:layout_x="78dp"
+            android:layout_y="38dp"
             >
 
         <ProgressBar
@@ -86,7 +86,42 @@
                 style="@style/Widget.ProgressBar.Vertical"
                 android:progress="79"
                 android:background="@android:color/transparent"
-                android:clickable="false"/>
+                android:clickable="false"
+                android:layout_gravity="center"/>
 
     </FrameLayout>
+
+    <ImageView
+            android:layout_width="42dp"
+            android:layout_height="27dp"
+            android:id="@+id/flow1"
+            android:layout_x="378dp"
+            android:layout_y="94dp"
+            android:src="@drawable/flow_switch_on"/>
+
+    <ImageView
+            android:layout_width="42dp"
+            android:layout_height="27dp"
+            android:id="@+id/flow2"
+            android:src="@drawable/flow_switch_on"
+            android:layout_x="378dp"
+            android:layout_y="191dp"/>
+
+    <ImageView
+            android:layout_width="61dp"
+            android:layout_height="60dp"
+            android:id="@+id/motor1"
+            android:src="@drawable/motor_on"
+            android:layout_x="430dp"
+            android:layout_y="118dp"
+            android:adjustViewBounds="false"/>
+
+    <ImageView
+            android:layout_width="61dp"
+            android:layout_height="60dp"
+            android:id="@+id/motor2"
+            android:src="@drawable/motor_on"
+            android:layout_x="430dp"
+            android:layout_y="219dip"
+            android:adjustViewBounds="false"/>
 </AbsoluteLayout>
