@@ -18,10 +18,12 @@ public class G4Modbus {
 
     boolean ArrayBits[][] = new boolean[4][8];
     int ArrayAI[] = new int [2];
+    boolean ForceSingleCoilSuccess;
+    String CoilCommand = "";
 
-
-    public static int TIMEOUT_VALUE=100;
-    private String[] DevicesAddresses;
+    // TimeOut = TIMEOUT_VALUE * 100 ms
+    public static int TIMEOUT_VALUE = 3;
+    private String DeviceAddress;
     private int Step = 3;
 
     /*
@@ -29,7 +31,13 @@ public class G4Modbus {
      * Author: CCR, JCC
      *
      * */
-    public G4Modbus(String port_path, int baudrate){
+    public G4Modbus(String port_path, int baudrate, int address){
+        if (address > 9){
+            DeviceAddress = "0x"+String.valueOf(address);
+        }
+        else{
+            DeviceAddress = "0x0"+String.valueOf(address);
+        }
         try {
             SerialPort port = new SerialPort(new File(port_path),baudrate);
             Tx = port.getOutputStream();
@@ -54,13 +62,11 @@ public class G4Modbus {
                 /* G4Modbus command 3 (16 words) */
                 readHoldingRegistersPolling();
                 break;
-            case 5:
-                /* G4Modbus command 5 (16 words) */
-                SendCommand("0x01,0x05,0x00,0x01,0xFF,0xFF");
-                break;
-            case 6:
-                /* G4Modbus command 6 */
-                SendCommand("0x00,0x06,0x00,0x02,0x00,0x80");
+            case 10:
+                /* G4Modbus No polling */
+                Log.i("G4MB - HeartBeat","No polling");
+                SendCommand(CoilCommand);
+                Step= 3;
                 break;
             default:
                 break;
@@ -76,11 +82,11 @@ public class G4Modbus {
     * */
     public boolean getBit (String input){
         if(input.substring(0,2).equals("PU")){
-            return ArrayBits[0][Integer.valueOf(input.substring(2,3))-1];
+            return ArrayBits[0][8-Integer.valueOf(input.substring(2,3))];
         }else if(input.substring(0,2).equals("SD")){
-            return ArrayBits[1][Integer.valueOf(input.substring(2,3))-1];
+            return ArrayBits[1][8-Integer.valueOf(input.substring(2,3))];
         }else if(input.substring(0,2).equals("BC")){
-            return ArrayBits[2][Integer.valueOf(input.substring(2,3))-1];
+            return ArrayBits[2][7-(Integer.valueOf(input.substring(2,3)))];
         }else if (input.substring(0,2).equals("ED")){
             return ArrayBits[3][Integer.valueOf(input.substring(2,3))-1];
         }
@@ -108,17 +114,38 @@ public class G4Modbus {
     * Author: CCR, JCC
     *
     * */
-    public boolean setDO (int dir, int output, boolean value){
+    public boolean setDO (int output, boolean value){
         return false;
     }
 
     /*
     * This method returns the value of a given Coil
+    * output: 0 for first coil. 8 coils
     * Author: CCR, JCC
     *
     * */
-    public boolean setCoil (int dir, int output, boolean value){
-        return false;
+    public boolean setCoil (int output, boolean value){
+        String out;
+        String val;
+
+        if (output < 9){
+            out = "0x0"+String.valueOf(output);
+        }
+        else {
+            // Input error
+            return false;
+        }
+        if (value){
+            val = "0xFF";
+        }
+        else {
+            val = "0x00";
+        }
+
+        // Turns polling off
+        Step = 10;
+        CoilCommand = DeviceAddress+",0x05,0x00,"+out+","+val+",0x00";
+        return ForceSingleCoilSuccess;
     }
 
    /*
@@ -177,7 +204,7 @@ public class G4Modbus {
         byte[] buffer = new byte[BUFFER_SIZE];
         int i = 0;
         int timeout = 0;
-
+        boolean cmdFiveOrSixDetected = false;
         try {
             // Tx
             Tx.flush();
@@ -186,11 +213,18 @@ public class G4Modbus {
             // Rx
             do {
                 if ( Rx.available() != 0 ) {
+
                     /* Blocking until byte Rx */
                     buffer[i] = (byte) Rx.read();
                     timeout = 0;
+
                     if (i == NUMBER_OF_DATA_BYTES_LOCATION){
                         bytesToRx += Integer.valueOf(buffer[i]);
+                        //Command 5 and 6 response is the echo of the request
+                        if(buffer[1] == 5 || buffer[1] == 6){
+                            bytesToRx += 3;
+                            cmdFiveOrSixDetected = true;
+                        }
                     }
                     i++;
                 }
@@ -210,51 +244,79 @@ public class G4Modbus {
             } while (i < bytesToRx);
             byte[] WithCRC = new byte[i];
             System.arraycopy(buffer, 0, WithCRC, 0, i);
-            // Check CRC
-            if (CRCValido(WithCRC)){
-                // Process Result
-                byte[] NoCRC = new byte[i-2];
-                System.arraycopy(WithCRC,0,NoCRC,0,i-2);
-                ProcessResult(NoCRC);
+            if(!cmdFiveOrSixDetected){
+                // Check CRC
+                if (CRCValido(WithCRC)){
+                    // Process Result
+                    byte[] NoCRC = new byte[i-2];
+                    System.arraycopy(WithCRC,0,NoCRC,0,i-2);
+                    ProcessResult(NoCRC);
+                }
+                else{
+                    Log.i("G4MB - CRC","Invalid CRC!");
+                }
             }
             else{
-                Log.i("G4MB - CRC","Invalid CRC!");
+                ProcessResult(WithCRC);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /*
+     * Process the response of a G4Modbus slave, fills ArrayBits and
+     * ArrayAI.
+     * Author: CCR, JCC
+     *
+     * */
     private void ProcessResult (byte[] response){
-        BitState myBits = new BitState();
+        Log.i("G4MB - ProcessResult",""+response[1]);
+        switch (response[1]) {
 
-        /* Process Bits */
-        String tempRes = "";
-        for (int i=0;i<response.length;i++){
-            tempRes=tempRes+"|"+String.valueOf(response[i]);
+            case 3: //Read Holding Register
+                BitState myBits = new BitState();
+
+                /* Process Bits */
+                String tempRes = "";
+                for (int i=0;i<response.length;i++){
+                    tempRes=tempRes+"|"+String.valueOf(response[i]);
+                }
+                byte[] BitAccessible = new byte[4];
+                System.arraycopy(response, 3, BitAccessible, 0, 4);
+                String ArrayBitsToPrint = "";
+                for (int B=0;B<4;B++){
+                    for (int b=0;b<8;b++){
+                        ArrayBits[B][b] = myBits.getBitState(BitAccessible[B],b);
+                        int temp;
+                        if(ArrayBits[B][b]) temp = 1; else temp = 0;
+                        ArrayBitsToPrint = ArrayBitsToPrint+"|"+temp;
+                    }
+                    ArrayBitsToPrint = ArrayBitsToPrint+"|\n";
+                }
+                Log.i("G4MB - DI ","Bits:\n"+ArrayBitsToPrint);
+
+                /* Process Analog Inputs */
+                byte[] AnalogInputsBytes = new byte[4];
+                System.arraycopy(response, 31, AnalogInputsBytes, 0, 4);
+
+                ArrayAI[0] = AnalogInputsBytes[0]*256 + AnalogInputsBytes[1];
+                ArrayAI[1] = AnalogInputsBytes[2]*256 + AnalogInputsBytes[3];
+                Log.i("G4MB - AI ","AI1: "+ArrayAI[0]);
+                Log.i("G4MB - AI ","AI2: "+ArrayAI[1]);
+                break;
+
+            case 5: //Force Single Coil
+                byte[] CC = ComandosExploracion(CoilCommand);
+
+                if (Arrays.equals(CC,response)){
+                    ForceSingleCoilSuccess = true;
+                }
+                else {
+                    ForceSingleCoilSuccess = false;
+                }
+                Log.i("G4MB - Force Single Coil",""+ForceSingleCoilSuccess);
         }
-        byte[] BitAccessible = new byte[4];
-        System.arraycopy(response, 3, BitAccessible, 0, 4);
-        String ArrayBitsToPrint = "";
-        for (int B=0;B<4;B++){
-            for (int b=0;b<8;b++){
-                ArrayBits[B][b] = myBits.getBitState(BitAccessible[B],b);
-                int temp;
-                if(ArrayBits[B][b]) temp = 1; else temp = 0;
-                ArrayBitsToPrint = ArrayBitsToPrint+"|"+temp;
-            }
-            ArrayBitsToPrint = ArrayBitsToPrint+"|\n";
-        }
-        Log.i("G4MB - DI ","Bits:\n"+ArrayBitsToPrint);
-
-        /* Process Analog Inputs */
-        byte[] AnalogInputsBytes = new byte[4];
-        System.arraycopy(response, 31, AnalogInputsBytes, 0, 4);
-
-        ArrayAI[0] = AnalogInputsBytes[0]*256 + AnalogInputsBytes[1];
-        ArrayAI[1] = AnalogInputsBytes[2]*256 + AnalogInputsBytes[3];
-        Log.i("G4MB - AI ","AI1: "+ArrayAI[0]);
-        Log.i("G4MB - AI ","AI2: "+ArrayAI[1]);
     }
 
     /*

@@ -3,11 +3,14 @@ package tanque;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.dte.tanque.R;
 
@@ -16,13 +19,15 @@ import java.util.TimerTask;
 
 public class MainActivity extends Activity {
     G4Modbus myG4Modbus;
+    ToggleButton ProcessOnOff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ProcessOnOff = (ToggleButton)findViewById(R.id.toggleButton);
 
-        myG4Modbus = new G4Modbus("/dev/ttyS1",19200);
+        myG4Modbus = new G4Modbus("/dev/ttyS1",19200,1);
 
         Timer ExploraESC = new Timer();
         ExploraESC.schedule(new TimerTask() {
@@ -40,6 +45,17 @@ public class MainActivity extends Activity {
             }
         }, 0, 1000);
 
+        ProcessOnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(ProcessOnOff.isChecked()){
+                    myG4Modbus.setCoil(1, true);
+                }
+                else {
+                    myG4Modbus.setCoil(1,false);
+                }
+            }
+        });
     }
 
     @Override
@@ -58,6 +74,18 @@ public class MainActivity extends Activity {
 
         final TextView level = (TextView)findViewById(R.id.nivel);
         final TextView volumen = (TextView)findViewById(R.id.volumen);
+
+        ProcessOnOff.post(new Runnable() {
+            @Override
+            public void run() {
+                if(myG4Modbus.getBit("BC0")){
+                    ProcessOnOff.setChecked(true);
+                }
+                else{
+                    ProcessOnOff.setChecked(false);
+                }
+            }
+        });
 
 
         flow1_on.post(new Runnable() {
