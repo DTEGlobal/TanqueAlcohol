@@ -2,6 +2,7 @@ package tanque;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AbsoluteLayout;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -23,6 +25,8 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
     G4Modbus myG4Modbus;
     ToggleButton ProcessOnOff;
+    Timer ExploraESC;
+    Timer UpdateUI;
 
     private double mNIVEL = 0.000875;
     private double bNIVEL = -0.6475;
@@ -46,7 +50,7 @@ public class MainActivity extends Activity {
         LEVELUNITS = myTankConfig.getUnits(1);
 
 
-        Timer ExploraESC = new Timer();
+        ExploraESC = new Timer();
         ExploraESC.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -54,7 +58,7 @@ public class MainActivity extends Activity {
             }
         }, 0, 500);
 
-        Timer UpdateUI = new Timer();
+        UpdateUI = new Timer();
         UpdateUI.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -73,6 +77,21 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        ImageView ConfigScreen = (ImageView)findViewById(R.id.mimico);
+        ConfigScreen.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Intent i = new Intent();
+                i.setClass(MainActivity.this, Configuration.class);
+                UpdateUI.cancel();
+                ExploraESC.cancel();
+                MainActivity.this.finish();
+                startActivity(i);
+                return false;
+            }
+        });
+
     }
 
     @Override
@@ -91,6 +110,8 @@ public class MainActivity extends Activity {
 
         final TextView level = (TextView)findViewById(R.id.nivel);
         final TextView volumen = (TextView)findViewById(R.id.volumen);
+
+
 
         ProcessOnOff.post(new Runnable() {
             @Override
