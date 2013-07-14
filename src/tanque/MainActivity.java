@@ -2,6 +2,9 @@ package tanque;
 
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,13 +24,27 @@ public class MainActivity extends Activity {
     G4Modbus myG4Modbus;
     ToggleButton ProcessOnOff;
 
+    private double mNIVEL = 0.000875;
+    private double bNIVEL = -0.6475;
+    private double AREATANQUE = 2.224;
+    private String LEVELUNITS = "mts";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         ProcessOnOff = (ToggleButton)findViewById(R.id.toggleButton);
 
         myG4Modbus = new G4Modbus("/dev/ttyS1",19200,1);
+
+
+        AnanlogInputsConfiguration myTankConfig = new AnanlogInputsConfiguration();
+        mNIVEL = myTankConfig.getM(1);
+        bNIVEL = myTankConfig.getB(1);
+        LEVELUNITS = myTankConfig.getUnits(1);
+
 
         Timer ExploraESC = new Timer();
         ExploraESC.schedule(new TimerTask() {
@@ -138,13 +155,8 @@ public class MainActivity extends Activity {
                 /* Altura Max = 2.59m = 100% */
                 /* Altura Min = 0m    = 0%*/
 
-                final double mNIVEL = 0.000875;
-                final double bNIVEL = -0.6475;
-                final double AREATANQUE = 2.224;
-
-
                 double nivel = (myG4Modbus.getAI(0)*mNIVEL)+bNIVEL;
-                String nivelToPrint = String.format("Nivel: %.2f mts",nivel);
+                String nivelToPrint = String.format("Nivel: %.2f "+LEVELUNITS,nivel);
                 level.setText(nivelToPrint);
 
                 double vol = AREATANQUE*nivel*1000;
@@ -157,3 +169,4 @@ public class MainActivity extends Activity {
         });
     }
 }
+
