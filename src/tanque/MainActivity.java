@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
             public void run() {
                 Update();
             }
-        }, 0, 1000);
+        }, 0, 100);
 
         ProcessOnOff.setOnClickListener(new View.OnClickListener() {
             @Override
