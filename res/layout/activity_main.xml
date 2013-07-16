@@ -43,7 +43,7 @@
                     android:layout_weight="100"
                     android:textColor="@android:color/background_dark"
                     android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:gravity="center_vertical"/>
 
             <TextView
@@ -54,7 +54,7 @@
                     android:layout_weight="100"
                     android:textColor="@android:color/background_dark"
                     android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:gravity="center_vertical"/>
         </LinearLayout>
 
