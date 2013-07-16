@@ -300,8 +300,11 @@ public class G4Modbus {
                 byte[] AnalogInputsBytes = new byte[4];
                 System.arraycopy(response, 31, AnalogInputsBytes, 0, 4);
 
-                ArrayAI[0] = AnalogInputsBytes[0]*256 + AnalogInputsBytes[1];
-                ArrayAI[1] = AnalogInputsBytes[2]*256 + AnalogInputsBytes[3];
+                // &0xFF will store the byte value in int to make it "unsigned" (the sign bit
+                // goes to the MSb of the 32 bits int)
+
+                ArrayAI[0] = (256*(AnalogInputsBytes[0]&0xFF)) + (AnalogInputsBytes[1]&0xFF);
+                ArrayAI[1] = (256*(AnalogInputsBytes[2]&0xFF)) + (AnalogInputsBytes[3]&0xFF);
                 Log.i("G4MB - AI ","AI1: "+ArrayAI[0]);
                 Log.i("G4MB - AI ","AI2: "+ArrayAI[1]);
                 break;
