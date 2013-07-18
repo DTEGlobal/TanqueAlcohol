@@ -19,58 +19,6 @@
             android:layout_x="0dp"
             android:layout_y="0dp"/>
 
-    <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="325dp"
-            android:layout_height="70dp"
-            android:layout_x="265dp"
-            android:layout_y="10dp"
-            android:background="@drawable/background_with_shadow"
-            android:padding="5dp">
-
-        <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="100"
-                >
-
-            <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:text="Nivel: 3 m"
-                    android:id="@+id/nivel"
-                    android:layout_weight="100"
-                    android:textColor="@android:color/background_dark"
-                    android:textStyle="bold"
-                    android:textSize="24sp"
-                    android:gravity="center_vertical"/>
-
-            <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:text="Volumen: 1000 L"
-                    android:id="@+id/volumen"
-                    android:layout_weight="100"
-                    android:textColor="@android:color/background_dark"
-                    android:textStyle="bold"
-                    android:textSize="24sp"
-                    android:gravity="center_vertical"/>
-        </LinearLayout>
-
-        <ToggleButton
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="New ToggleButton"
-                android:id="@+id/toggleButton"
-                android:layout_weight="200"
-                android:textStyle="bold"
-                android:textOff="Arranque"
-                android:textOn="Paro"
-                android:textSize="17dp"
-                />
-    </LinearLayout>
-
     <FrameLayout
             android:layout_width="168dp"
             android:layout_height="206dp"
@@ -84,11 +32,53 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 style="@style/Widget.ProgressBar.Vertical"
-                android:progress="79"
+                android:progress="50"
                 android:background="@android:color/transparent"
                 android:clickable="false"
                 android:layout_gravity="center"
                 android:indeterminate="false"/>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_x="265dp"
+                android:layout_y="10dp"
+                android:background="@android:color/transparent"
+                android:padding="5dp"
+                android:layout_gravity="center">
+
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="100"
+                    >
+
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Nivel: 3.00 m"
+                        android:id="@+id/nivel"
+                        android:layout_weight="100"
+                        android:textColor="@android:color/background_dark"
+                        android:textStyle="bold"
+                        android:textSize="24sp"
+                        android:gravity="center_vertical|center_horizontal"/>
+
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Volumen: 1000 L"
+                        android:id="@+id/volumen"
+                        android:layout_weight="100"
+                        android:textColor="@android:color/background_dark"
+                        android:textStyle="bold"
+                        android:textSize="24sp"
+                        android:gravity="center_vertical|center_horizontal"/>
+            </LinearLayout>
+
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -125,4 +115,52 @@
             android:layout_x="430dp"
             android:layout_y="219dip"
             android:adjustViewBounds="false"/>
+
+    <LinearLayout
+            android:layout_width="280dp"
+            android:layout_height="85dp"
+            android:layout_x="290dp"
+            android:layout_y="10dp"
+            android:focusableInTouchMode="false">
+
+        <FrameLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="100"
+                android:padding="5dp">
+
+            <ToggleButton
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="New ToggleButton"
+                    android:id="@+id/arranque_m1"
+                    android:layout_weight="200"
+                    android:textOff="Arranque M1"
+                    android:textOn="Paro M1"
+                    android:textSize="20dp"
+                    android:layout_x="504dp"
+                    android:layout_y="29dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="100"
+                android:padding="5dp">
+
+            <ToggleButton
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="New ToggleButton"
+                    android:id="@+id/arranque_m2"
+                    android:layout_weight="200"
+                    android:textOff="Arranque M2"
+                    android:textOn="Paro M2"
+                    android:textSize="20dp"
+                    android:layout_x="328dp"
+                    android:layout_y="32dp"
+                    android:checked="false"/>
+        </FrameLayout>
+    </LinearLayout>
+
 </AbsoluteLayout>

@@ -3,7 +3,6 @@ package tanque;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -27,7 +26,7 @@ public class Configuration  extends Activity {
     EditText m;
     EditText b;
     EditText units;
-    AnanlogInputsConfiguration myAIC;
+    AnalogInputsConfiguration myAIC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +41,7 @@ public class Configuration  extends Activity {
 
 
 
-        myAIC = new AnanlogInputsConfiguration();
+        myAIC = new AnalogInputsConfiguration();
         mNIVEL= myAIC.getM(1);
         String mNivelToPrint = String.format("%.6f ",mNIVEL);
         bNIVEL= myAIC.getB(1);

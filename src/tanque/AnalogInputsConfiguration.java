@@ -7,7 +7,7 @@ import android.util.Log;
 /**
  * Created by Cesar on 7/13/13.
  */
-public class AnanlogInputsConfiguration {
+public class AnalogInputsConfiguration {
 
     public double getM(int AnalogInputAI){
         //Get Configuration from DB

@@ -66,7 +66,7 @@ public class G4Modbus {
                 /* G4Modbus No polling */
                 Log.i("G4MB - HeartBeat","No polling");
                 SendCommand(CoilCommand);
-                Step= 3;
+                Step = 3;
                 break;
             default:
                 break;
@@ -84,7 +84,7 @@ public class G4Modbus {
         if(input.substring(0,2).equals("PU")){
             return ArrayBits[0][8-Integer.valueOf(input.substring(2,3))];
         }else if(input.substring(0,2).equals("SD")){
-            return ArrayBits[1][8-Integer.valueOf(input.substring(2,3))];
+            return ArrayBits[1][Integer.valueOf(input.substring(2,3))-1];
         }else if(input.substring(0,2).equals("BC")){
             return ArrayBits[2][7-(Integer.valueOf(input.substring(2,3)))];
         }else if (input.substring(0,2).equals("ED")){
@@ -129,7 +129,7 @@ public class G4Modbus {
         String val;
 
         if (output < 9){
-            out = "0x0"+String.valueOf(output);
+            out = "0x0"+String.valueOf(output-1);
         }
         else {
             // Input error
@@ -238,7 +238,7 @@ public class G4Modbus {
                     if (timeout >= TIMEOUT_VALUE){
                         //TODO throw timeout exception
                         Log.i("G4MB - Rx","Time Out!");
-                        break;
+                        return;
                     }
                 }
             } while (i < bytesToRx);
@@ -271,7 +271,6 @@ public class G4Modbus {
      *
      * */
     private void ProcessResult (byte[] response){
-        Log.i("G4MB - ProcessResult",""+response[1]);
         switch (response[1]) {
 
             case 3: //Read Holding Register
@@ -318,7 +317,7 @@ public class G4Modbus {
                 else {
                     ForceSingleCoilSuccess = false;
                 }
-                Log.i("G4MB - Force Single Coil",""+ForceSingleCoilSuccess);
+                Log.i("G4MB - Force Single Coil","Success? "+ForceSingleCoilSuccess);
         }
     }
 

@@ -3,14 +3,10 @@ package tanque;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AbsoluteLayout;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -24,13 +20,15 @@ import java.util.TimerTask;
 
 public class MainActivity extends Activity {
     G4Modbus myG4Modbus;
-    ToggleButton ProcessOnOff;
+    ToggleButton Motor1OnOff;
+    ToggleButton Motor2OnOff;
+
     Timer ExploraESC;
     Timer UpdateUI;
 
     private double mNIVEL = 0.000875;
-    private double bNIVEL = -0.6475;
-    private double AREATANQUE = 2.224;
+    private double bNIVEL = -0.595;
+    private double AREATANQUE = 2.38;
     private String LEVELUNITS = "mts";
 
 
@@ -39,12 +37,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        ProcessOnOff = (ToggleButton)findViewById(R.id.toggleButton);
+        Motor1OnOff = (ToggleButton)findViewById(R.id.arranque_m1);
+        Motor2OnOff = (ToggleButton)findViewById(R.id.arranque_m2);
 
         myG4Modbus = new G4Modbus("/dev/ttyS1",19200,1);
 
 
-        AnanlogInputsConfiguration myTankConfig = new AnanlogInputsConfiguration();
+        AnalogInputsConfiguration myTankConfig = new AnalogInputsConfiguration();
         mNIVEL = myTankConfig.getM(1);
         bNIVEL = myTankConfig.getB(1);
         LEVELUNITS = myTankConfig.getUnits(1);
@@ -56,7 +55,7 @@ public class MainActivity extends Activity {
             public void run() {
                 myG4Modbus.HeartBeat();
             }
-        }, 0, 500);
+        }, 0, 100);
 
         UpdateUI = new Timer();
         UpdateUI.schedule(new TimerTask() {
@@ -64,19 +63,82 @@ public class MainActivity extends Activity {
             public void run() {
                 Update();
             }
-        }, 0, 100);
+        }, 0, 200);
 
-        ProcessOnOff.setOnClickListener(new View.OnClickListener() {
+        UpdateUI.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Update_Buttons();
+            }
+        }, 0, 10);
+
+
+        Motor1OnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(ProcessOnOff.isChecked()){
-                    myG4Modbus.setCoil(1, true);
+                if (myG4Modbus.getBit("SD1")) {
+                    myG4Modbus.setCoil(2, false);
+                } else {
+                    myG4Modbus.setCoil(2, true);
                 }
-                else {
-                    myG4Modbus.setCoil(1,false);
-                }
+
             }
         });
+
+        Motor1OnOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Thread myWait = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (!myG4Modbus.getBit("SD1")) {
+                            myG4Modbus.setCoil(2, false);
+                        }
+                        Thread.currentThread().interrupt();
+                    }
+                };
+                myWait.start();
+            }
+        });
+
+        Motor2OnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (myG4Modbus.getBit("SD2")) {
+                    myG4Modbus.setCoil(3, false);
+                } else {
+                    myG4Modbus.setCoil(3, true);
+                }
+
+            }
+        });
+
+        Motor2OnOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Thread myWait = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (!myG4Modbus.getBit("SD2")) {
+                            myG4Modbus.setCoil(3, false);
+                        }
+                        Thread.currentThread().interrupt();
+                    }
+                };
+                myWait.start();
+            }
+        });
+
 
         ImageView ConfigScreen = (ImageView)findViewById(R.id.mimico);
         ConfigScreen.setOnLongClickListener(new View.OnLongClickListener() {
@@ -111,19 +173,6 @@ public class MainActivity extends Activity {
         final TextView level = (TextView)findViewById(R.id.nivel);
         final TextView volumen = (TextView)findViewById(R.id.volumen);
 
-
-
-        ProcessOnOff.post(new Runnable() {
-            @Override
-            public void run() {
-                if(myG4Modbus.getBit("BC0")){
-                    ProcessOnOff.setChecked(true);
-                }
-                else{
-                    ProcessOnOff.setChecked(false);
-                }
-            }
-        });
 
 
         flow1_on.post(new Runnable() {
@@ -173,19 +222,49 @@ public class MainActivity extends Activity {
         tank.post(new Runnable() {
             @Override
             public void run() {
-                /* Altura Max = 2.59m = 100% */
-                /* Altura Min = 0m    = 0%*/
+                /* Ctas = 3700 = 100% */
+                /* Ctas = 740  = 0%*/
 
-                double nivel = (myG4Modbus.getAI(0)*mNIVEL)+bNIVEL;
-                String nivelToPrint = String.format("Nivel: %.2f "+LEVELUNITS,nivel);
+                int Ctas = myG4Modbus.getAI(0);
+                double nivel = (Ctas*mNIVEL)+bNIVEL;
+                String nivelToPrint = String.format("Nivel:\n%.2f "+LEVELUNITS,nivel);
                 level.setText(nivelToPrint);
 
                 double vol = AREATANQUE*nivel*1000;
-                String volumenToPrint = String.format("Volumen: %.2f lts",vol);
+                String volumenToPrint = String.format("Volumen:\n%.2f lts",vol);
                 volumen.setText(volumenToPrint);
 
-                Double percent = (100*nivel)/2.59;
+                double mCtas = 100.0/(3700-740);
+                double bCtas = -740*mCtas;
+
+                Double percent = (mCtas*Ctas)+bCtas;
+
                 tank.setProgress(percent.intValue());
+            }
+        });
+    }
+    private void Update_Buttons(){
+        Motor1OnOff.post(new Runnable() {
+            @Override
+            public void run() {
+                if(myG4Modbus.getBit("SD1")){
+                    Motor1OnOff.setChecked(true);
+                }
+                else{
+                    Motor1OnOff.setChecked(false);
+                }
+            }
+        });
+
+        Motor2OnOff.post(new Runnable() {
+            @Override
+            public void run() {
+                if(myG4Modbus.getBit("SD2")){
+                    Motor2OnOff.setChecked(true);
+                }
+                else{
+                    Motor2OnOff.setChecked(false);
+                }
             }
         });
     }
